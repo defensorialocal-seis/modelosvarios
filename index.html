@@ -37,15 +37,25 @@
     .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
     .loading-indicator { text-align: center; padding: 20px; color: #555; display: none; }
 
-    /* Estilos del editor de texto */
-    .tox-tinymce { border-radius: 5px; }
+    /* Estilos del editor de texto Quill */
+    #body-editor {
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      min-height: 300px;
+      font-size: 16px;
+      padding: 10px;
+    }
+    .ql-toolbar.ql-snow {
+      border-radius: 5px 5px 0 0;
+    }
   </style>
-  
+
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
-  <script src="https://cdn.tiny.cloud/1/z7crq0ibfqzrrgrwdetqg74fgt7woo3nwaihr9g2rcllowcp/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body>
 
@@ -109,8 +119,8 @@
         </div>
 
         <div class="form-group">
-          <label for="body">Cuerpo del Escrito *</label>
-          <textarea id="body" name="body" rows="20" required></textarea>
+          <label for="body-editor">Cuerpo del Escrito *</label>
+          <div id="body-editor" required></div>
         </div>
 
         <div class="form-actions">
@@ -125,20 +135,18 @@
   <script>
     // Configuración de tu proyecto de Firebase
     const firebaseConfig = {
-apiKey: "AIzaSyAchXP14PPlBLGFdJhQG-ABvCZEvxtExP0",
-  authDomain: "modelosvarios6.firebaseapp.com",
-  projectId: "modelosvarios6",
-  storageBucket: "modelosvarios6.firebasestorage.app",
-  messagingSenderId: "1020516092766",
-  appId: "1:1020516092766:web:56954ecc35055fff901dcf"
+      apiKey: "AIzaSyAchXP14PPlBLGFdJhQG-ABvCZEvxtExP0",
+      authDomain: "modelosvarios6.firebaseapp.com",
+      projectId: "modelosvarios6",
+      storageBucket: "modelosvarios6.firebasestorage.app",
+      messagingSenderId: "1020516092766",
+      appId: "1:1020516092766:web:56954ecc35055fff901dcf"
     };
 
     // Inicializa Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const storage = firebase.storage();
     const modelsCollection = db.collection('modelos');
-    const storageRef = storage.ref();
 
     let models = [];
     let currentPage = 1;
@@ -158,28 +166,27 @@ apiKey: "AIzaSyAchXP14PPlBLGFdJhQG-ABvCZEvxtExP0",
       printBtn: document.getElementById('printBtn'),
       deleteBtn: document.getElementById('deleteBtn'),
       titleInput: document.getElementById('title'),
-      bodyTextarea: document.getElementById('body'),
       thematicSelect: document.getElementById('thematic'),
       processSelect: document.getElementById('process'),
       lawInput: document.getElementById('law')
     };
     
-    // Inicializa el editor de texto enriquecido TinyMCE
-    let editor;
-    tinymce.init({
-      selector: '#body',
-      license_key: 'gpl',
-      plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking save table directionality emoticons template paste textpattern autoresize',
-      toolbar: 'formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | forecolor backcolor | fontselect fontsizeselect | print preview',
-      menubar: false,
-      height: 400,
-      min_height: 300,
-      max_chars: 10000,
-      setup: function (ed) {
-        ed.on('init', function (args) {
-          editor = ed;
-        });
-      }
+    // Inicializa el editor de texto Quill
+    let quill;
+    quill = new Quill('#body-editor', {
+        theme: 'snow',
+        placeholder: 'Escribe aquí el cuerpo del escrito...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'align': [] }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        }
     });
 
     // Funciones de la interfaz de usuario
@@ -196,7 +203,7 @@ apiKey: "AIzaSyAchXP14PPlBLGFdJhQG-ABvCZEvxtExP0",
     function openModal(model = null) {
       elements.modelForm.reset();
       document.getElementById('modelId').value = '';
-      editor.setContent('');
+      quill.setContents([]);
 
       if (model) {
         elements.modalTitle.textContent = 'Editar Escrito';
@@ -205,7 +212,9 @@ apiKey: "AIzaSyAchXP14PPlBLGFdJhQG-ABvCZEvxtExP0",
         elements.thematicSelect.value = model.thematic;
         elements.processSelect.value = model.process;
         elements.lawInput.value = model.law || '';
-        editor.setContent(model.body || '');
+        
+        // Cargar contenido en el editor Quill
+        quill.clipboard.dangerouslyPasteHTML(model.body || '');
         
         elements.deleteBtn.style.display = 'inline-block';
         elements.printBtn.style.display = 'inline-block';
@@ -302,7 +311,9 @@ apiKey: "AIzaSyAchXP14PPlBLGFdJhQG-ABvCZEvxtExP0",
       const thematic = elements.thematicSelect.value;
       const process = elements.processSelect.value;
       const law = elements.lawInput.value.trim();
-      const body = editor.getContent();
+      
+      // Obtener el contenido del editor Quill en formato HTML
+      const body = quill.root.innerHTML;
 
       if (!title || !thematic || !process || !body) {
         alert('Los campos Título, Temática, Proceso y Cuerpo del Escrito son obligatorios.');

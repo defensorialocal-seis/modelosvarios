@@ -64,7 +64,7 @@
 
     <div class="search-bar">
       <i>🔍</i>
-      <input type="text" id="searchInput" placeholder="Buscar por título, temática, proceso, ley o contenido...">
+      <input type="text" id="searchInput" placeholder="Buscar por título, temática, categoria, ley o contenido...">
     </div>
 
     <button class="btn btn-new" id="newModelBtn">Nuevo Modelo</button>
@@ -258,7 +258,7 @@
           card.innerHTML = `
             <h3>${model.title}</h3>
             <p><strong>Temática:</strong> ${model.thematic || 'N/A'}</p>
-            <p><strong>Proceso:</strong> ${model.process || 'N/A'}</p>
+            <p><strong>Categoria:</strong> ${model.process || 'N/A'}</p>
             <p><strong>Ley:</strong> ${model.law || '-'}</p>
             <div class="actions">
               <button class="btn btn-edit" onclick="editModel('${model.id}')">Ver y Editar</button>
@@ -320,7 +320,7 @@
       const body = quill.root.innerHTML;
 
       if (!title || !thematic || !process || !body) {
-        alert('Los campos Título, Temática, Proceso y Cuerpo del Escrito son obligatorios.');
+        alert('Los campos Título, Temática, Categoria y Cuerpo del Escrito son obligatorios.');
         return;
       }
       
@@ -377,7 +377,7 @@
             <body>
               <h1>${model.title}</h1>
               <p><strong>Temática:</strong> ${model.thematic || 'N/A'}</p>
-              <p><strong>Proceso:</strong> ${model.process || 'N/A'}</p>
+              <p><strong>Categoria:</strong> ${model.process || 'N/A'}</p>
               <p><strong>Ley:</strong> ${model.law || '-'}</p>
               <hr>
               <div>${model.body}</div>

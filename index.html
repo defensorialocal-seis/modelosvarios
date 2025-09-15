@@ -100,8 +100,8 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="process">Categoria *</label>
-          <select id="process" name="process" required>
+          <label for="categoria">Categoria *</label>
+          <select id="categoria" name="categoria" required>
             <option value="">Selecciona...</option>
             <option value="Demanda">Demanda</option>
             <option value="Contestación">Contestación</option>
@@ -171,7 +171,7 @@
       deleteBtn: document.getElementById('deleteBtn'),
       titleInput: document.getElementById('title'),
       thematicSelect: document.getElementById('thematic'),
-      processSelect: document.getElementById('process'),
+      categoriaSelect: document.getElementById('categoria'),
       lawInput: document.getElementById('law')
     };
     
@@ -214,7 +214,7 @@
         document.getElementById('modelId').value = model.id;
         elements.titleInput.value = model.title;
         elements.thematicSelect.value = model.thematic;
-        elements.processSelect.value = model.process;
+        elements.categoriaSelect.value = model.categoria;
         elements.lawInput.value = model.law || '';
         
         // Cargar contenido en el editor Quill
@@ -258,7 +258,7 @@
           card.innerHTML = `
             <h3>${model.title}</h3>
             <p><strong>Temática:</strong> ${model.thematic || 'N/A'}</p>
-            <p><strong>Categoria:</strong> ${model.process || 'N/A'}</p>
+            <p><strong>Categoria:</strong> ${model.categoria || 'N/A'}</p>
             <p><strong>Ley:</strong> ${model.law || '-'}</p>
             <div class="actions">
               <button class="btn btn-edit" onclick="editModel('${model.id}')">Ver y Editar</button>
@@ -313,18 +313,18 @@
       const id = document.getElementById('modelId').value;
       const title = elements.titleInput.value.trim();
       const thematic = elements.thematicSelect.value;
-      const process = elements.processSelect.value;
+      const categoria = elements.categoriaSelect.value;
       const law = elements.lawInput.value.trim();
       
       // Obtener el contenido del editor Quill en formato HTML
       const body = quill.root.innerHTML;
 
-      if (!title || !thematic || !process || !body) {
+      if (!title || !thematic || !categoria || !body) {
         alert('Los campos Título, Temática, Categoria y Cuerpo del Escrito son obligatorios.');
         return;
       }
       
-      const modelData = { title, thematic, process, law, body };
+      const modelData = { title, thematic, categoria, law, body };
 
       try {
         if (id) {
@@ -377,7 +377,7 @@
             <body>
               <h1>${model.title}</h1>
               <p><strong>Temática:</strong> ${model.thematic || 'N/A'}</p>
-              <p><strong>Categoria:</strong> ${model.process || 'N/A'}</p>
+              <p><strong>Categoria:</strong> ${model.categoria || 'N/A'}</p>
               <p><strong>Ley:</strong> ${model.law || '-'}</p>
               <hr>
               <div>${model.body}</div>
